@@ -1,6 +1,7 @@
 package com.piyushsatija.todo;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -35,7 +36,8 @@ public class TodoListActivity extends AppCompatActivity implements View.OnClickL
     private RecyclerView todoListRecyclerView;
     private ActionBar actionBar;
     private FloatingActionButton createTaskFAB;
-    private static final int REQUEST_ADD_TASK = 100;
+    public static final int REQUEST_ADD_TASK = 100;
+    public static final int REQUEST_UPDATE_TASK = 200;
     private static SharedPrefUtils sharedPrefUtils;
     private FirebaseAuth mAuth;
     private GoogleSignInClient mGoogleSignInClient;
@@ -111,9 +113,19 @@ public class TodoListActivity extends AppCompatActivity implements View.OnClickL
         todoListRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new FirestoreRecyclerAdapter<TodoItem, TaskViewHolder>(options) {
             @Override
-            protected void onBindViewHolder(@NonNull TaskViewHolder taskViewHolder, int position, @NonNull TodoItem todoItem) {
+            protected void onBindViewHolder(@NonNull TaskViewHolder taskViewHolder, int position, @NonNull final TodoItem todoItem) {
                 taskViewHolder.setTaskName(todoItem.getTaskName());
                 taskViewHolder.setTaskTime(todoItem.getTaskTime());
+                taskViewHolder.markCompleted(todoItem.isCompleted());
+                taskViewHolder.getView().setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(TodoListActivity.this, TodoItemActivity.class);
+                        intent.putExtra("request_code", REQUEST_UPDATE_TASK);
+                        intent.putExtra("todo_item", todoItem);
+                        startActivityForResult(intent, REQUEST_UPDATE_TASK);
+                    }
+                });
             }
 
             @NonNull
@@ -144,7 +156,9 @@ public class TodoListActivity extends AppCompatActivity implements View.OnClickL
     @Override
     public void onClick(View view) {
         if (view.getId() == R.id.fab_create_todo) {
-            startActivityForResult(new Intent(TodoListActivity.this, TodoItemActivity.class), REQUEST_ADD_TASK);
+            Intent intent = new Intent(TodoListActivity.this, TodoItemActivity.class);
+            intent.putExtra("request_code", REQUEST_ADD_TASK);
+            startActivityForResult(intent, REQUEST_ADD_TASK);
         }
     }
 
@@ -154,6 +168,10 @@ public class TodoListActivity extends AppCompatActivity implements View.OnClickL
         if (requestCode == REQUEST_ADD_TASK) {
             if (resultCode == RESULT_OK) {
                 Toast.makeText(this, "Task Added Successfully", Toast.LENGTH_SHORT).show();
+            }
+        } else if (requestCode == REQUEST_UPDATE_TASK) {
+            if (resultCode == RESULT_OK) {
+                Toast.makeText(this, "Task Updated Successfully", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -167,6 +185,10 @@ class TaskViewHolder extends RecyclerView.ViewHolder {
         view = itemView;
     }
 
+    View getView() {
+        return view;
+    }
+
     void setTaskName(String taskName) {
         TextView textView = view.findViewById(R.id.task_name);
         textView.setText(taskName);
@@ -175,5 +197,9 @@ class TaskViewHolder extends RecyclerView.ViewHolder {
     void setTaskTime(String taskTime) {
         TextView textView = view.findViewById(R.id.task_time);
         textView.setText(taskTime);
+    }
+
+    void markCompleted(boolean complete) {
+//        view.findViewById(R.id.card_task).setBackgroundColor(complete ? Color.GREEN: Color.WHITE);
     }
 }
