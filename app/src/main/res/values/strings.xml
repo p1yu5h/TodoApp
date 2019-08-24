@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">TodoApp</string>
+    <string name="placeholder_task_name">Task Name</string>
+    <string name="prompt_sign_in">Please Sign In To Continue</string>
 </resources>
