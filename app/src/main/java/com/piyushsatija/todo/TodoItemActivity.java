@@ -1,10 +1,13 @@
 package com.piyushsatija.todo;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
@@ -44,6 +47,7 @@ import com.piyushsatija.todo.utils.SharedPrefUtils;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 public class TodoItemActivity extends AppCompatActivity implements View.OnClickListener {
     private TextView timeText;
@@ -178,6 +182,7 @@ public class TodoItemActivity extends AppCompatActivity implements View.OnClickL
             public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
                 timeText.setText(selectedHour + ":" + selectedMinute);
                 taskTime = selectedHour + ":" + selectedMinute;
+                setReminder(selectedHour, selectedMinute);
             }
         }, hour, minute, false);
         mTimePicker.setTitle("Select Time");
@@ -248,8 +253,6 @@ public class TodoItemActivity extends AppCompatActivity implements View.OnClickL
                                     collectionReference.document(document.getId())
                                             .collection("comments")
                                             .add(comment);
-//                                            .document()
-//                                            .set(comment, SetOptions.merge());
                                 }
                             }
                         }
@@ -265,6 +268,31 @@ public class TodoItemActivity extends AppCompatActivity implements View.OnClickL
         });
 
         builder.show();
+    }
+
+    private void setReminder(int hour, int minute) {
+        Intent alarmIntent = new Intent(this, AlarmReceiver.class);
+        alarmIntent.putExtra("title", taskNameEditText.getText().toString());
+        Random r = new Random();
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, r.nextInt(100000), alarmIntent, 0);
+        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, hour);
+        calendar.set(Calendar.MINUTE, minute);
+        calendar.set(Calendar.SECOND, 1);
+        // if notification time is before selected time, send notification the next day
+        if (calendar.before(Calendar.getInstance())) {
+            calendar.add(Calendar.DATE, 1);
+        }
+        if (manager != null) {
+            manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
+                    AlarmManager.INTERVAL_DAY, pendingIntent);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                manager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+            }
+        }
     }
 
     @Override
