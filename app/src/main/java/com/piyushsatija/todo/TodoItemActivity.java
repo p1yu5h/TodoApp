@@ -64,7 +64,6 @@ public class TodoItemActivity extends AppCompatActivity implements View.OnClickL
     private RecyclerView commentRecyclerView;
     private FirestoreRecyclerAdapter<Comment, CommentViewHolder> adapter;
     private ImageButton addCommentBtn;
-    private Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,7 +77,6 @@ public class TodoItemActivity extends AppCompatActivity implements View.OnClickL
         findViewById(R.id.add_alarm).setOnClickListener(this);
         addCommentBtn = findViewById(R.id.add_comment);
         addCommentBtn.setOnClickListener(this);
-        context = this;
         setupToolbar();
         handleIntent();
         // Access a Cloud Firestore instance from your Activity
@@ -102,7 +100,7 @@ public class TodoItemActivity extends AppCompatActivity implements View.OnClickL
             taskStatus = todoItem.isCompleted();
             taskStatusSwitch.setChecked(taskStatus);
             taskTime = todoItem.getTaskTime();
-            timeText.setText("Reminder set for " + taskTime);
+            if (taskTime != null) timeText.setText(getString(R.string.text_reminder, taskTime));
         }
     }
 
@@ -181,7 +179,7 @@ public class TodoItemActivity extends AppCompatActivity implements View.OnClickL
             @Override
             public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
                 String formattedTime = String.format("%02d:%02d", selectedHour, selectedMinute);
-                timeText.setText("Reminder Set for " + formattedTime);
+                timeText.setText(getString(R.string.text_reminder, formattedTime));
                 taskTime = formattedTime;
                 setReminder(selectedHour, selectedMinute);
             }
@@ -314,7 +312,7 @@ public class TodoItemActivity extends AppCompatActivity implements View.OnClickL
                 break;
             case R.id.add_comment:
                 if (requestCode == TodoListActivity.REQUEST_ADD_TASK) {
-                    Toast.makeText(this, "Comments can be added after saving the task.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getString(R.string.toast_comment), Toast.LENGTH_SHORT).show();
                 } else if (requestCode == TodoListActivity.REQUEST_UPDATE_TASK) {
                     addComment();
                 }

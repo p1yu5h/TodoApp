@@ -101,7 +101,7 @@ public class TodoListActivity extends AppCompatActivity implements View.OnClickL
 
     private void setupToolbar() {
         actionBar = getSupportActionBar();
-        if (actionBar != null) actionBar.setTitle("Welcome, " + sharedPrefUtils.getUserName());
+        if (actionBar != null) actionBar.setTitle(getString(R.string.text_welcome, sharedPrefUtils.getUserName()));
     }
 
     private void setupViews() {
@@ -169,11 +169,11 @@ public class TodoListActivity extends AppCompatActivity implements View.OnClickL
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_ADD_TASK) {
             if (resultCode == RESULT_OK) {
-                Toast.makeText(this, "Task Added Successfully", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.text_task_added), Toast.LENGTH_SHORT).show();
             }
         } else if (requestCode == REQUEST_UPDATE_TASK) {
             if (resultCode == RESULT_OK) {
-                Toast.makeText(this, "Task Updated Successfully", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.text_task_updated), Toast.LENGTH_SHORT).show();
             }
         }
     }

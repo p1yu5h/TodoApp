@@ -2,4 +2,9 @@
     <string name="app_name">TodoApp</string>
     <string name="placeholder_task_name">Task Name</string>
     <string name="prompt_sign_in">Please Sign In To Continue</string>
+    <string name="toast_comment">Comments can be added after saving the task.</string>
+    <string name="text_welcome">Welcome, %s</string>
+    <string name="text_reminder">Reminder set for %s</string>
+    <string name="text_task_added">Task Added Successfully</string>
+    <string name="text_task_updated">Task Updated Successfully</string>
 </resources>
