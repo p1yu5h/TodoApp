@@ -102,7 +102,7 @@ public class TodoItemActivity extends AppCompatActivity implements View.OnClickL
             taskStatus = todoItem.isCompleted();
             taskStatusSwitch.setChecked(taskStatus);
             taskTime = todoItem.getTaskTime();
-            timeText.setText(taskTime);
+            timeText.setText("Reminder set for " + taskTime);
         }
     }
 
@@ -180,8 +180,9 @@ public class TodoItemActivity extends AppCompatActivity implements View.OnClickL
         mTimePicker = new TimePickerDialog(TodoItemActivity.this, new TimePickerDialog.OnTimeSetListener() {
             @Override
             public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
-                timeText.setText(selectedHour + ":" + selectedMinute);
-                taskTime = selectedHour + ":" + selectedMinute;
+                String formattedTime = String.format("%02d:%02d", selectedHour, selectedMinute);
+                timeText.setText("Reminder Set for " + formattedTime);
+                taskTime = formattedTime;
                 setReminder(selectedHour, selectedMinute);
             }
         }, hour, minute, false);
