@@ -17,6 +17,7 @@ import android.widget.ImageButton;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
@@ -96,8 +97,7 @@ public class TodoItemActivity extends AppCompatActivity implements View.OnClickL
             taskStatusSwitch.setChecked(taskStatus);
             taskTime = todoItem.getTaskTime();
             timeText.setText(taskTime);
-            addCommentBtn.setEnabled(true);
-        } else addCommentBtn.setEnabled(false);
+        }
     }
 
     private void setupToolbar() {
@@ -282,7 +282,11 @@ public class TodoItemActivity extends AppCompatActivity implements View.OnClickL
                 finish();
                 break;
             case R.id.add_comment:
-                addComment();
+                if (requestCode == TodoListActivity.REQUEST_ADD_TASK) {
+                    Toast.makeText(this, "Comments can be added after saving the task.", Toast.LENGTH_SHORT).show();
+                } else if (requestCode == TodoListActivity.REQUEST_UPDATE_TASK) {
+                    addComment();
+                }
                 break;
         }
     }
