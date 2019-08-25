@@ -2,6 +2,7 @@ package com.piyushsatija.todo;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -16,6 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -200,6 +202,18 @@ class TaskViewHolder extends RecyclerView.ViewHolder {
     }
 
     void markCompleted(boolean complete) {
-//        view.findViewById(R.id.card_task).setBackgroundColor(complete ? Color.GREEN: Color.WHITE);
+        CardView cardView = view.findViewById(R.id.card_task);
+        TextView textView = view.findViewById(R.id.task_name);
+        if (complete) {
+            cardView.setCardBackgroundColor(Color.GRAY);
+            cardView.setCardElevation(0);
+            textView.setPaintFlags(textView.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+        } else {
+            cardView.setCardBackgroundColor(Color.WHITE);
+            cardView.setCardElevation(20);
+            textView.setPaintFlags(textView.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+        }
+
+
     }
 }

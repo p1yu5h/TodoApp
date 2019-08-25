@@ -2,6 +2,7 @@ package com.piyushsatija.todo;
 
 import android.app.Activity;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,7 +11,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -60,6 +60,7 @@ public class TodoItemActivity extends AppCompatActivity implements View.OnClickL
     private RecyclerView commentRecyclerView;
     private FirestoreRecyclerAdapter<Comment, CommentViewHolder> adapter;
     private ImageButton addCommentBtn;
+    private Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +74,7 @@ public class TodoItemActivity extends AppCompatActivity implements View.OnClickL
         findViewById(R.id.add_alarm).setOnClickListener(this);
         addCommentBtn = findViewById(R.id.add_comment);
         addCommentBtn.setOnClickListener(this);
+        context = this;
         setupToolbar();
         handleIntent();
         // Access a Cloud Firestore instance from your Activity
@@ -104,7 +106,7 @@ public class TodoItemActivity extends AppCompatActivity implements View.OnClickL
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setTitle("Add a Task");
+            actionBar.setTitle(requestCode == TodoListActivity.REQUEST_ADD_TASK ? "Add a Task" : "Update Task");
         }
     }
 

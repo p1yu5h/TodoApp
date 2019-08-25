@@ -9,7 +9,7 @@
     android:layout_marginEnd="16dp"
     android:layout_marginBottom="8dp"
     app:cardCornerRadius="6dp"
-    app:cardElevation="5dp"
+    app:cardElevation="4dp"
     android:id="@+id/card_task">
 
     <LinearLayout
@@ -25,7 +25,7 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:textColor="@android:color/black"
-            android:textSize="24sp"
+            android:textSize="20sp"
             tools:text="Have Dinner" />
 
         <TextView
@@ -34,7 +34,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             android:textColor="#005555"
-            android:textSize="18sp"
+            android:textSize="16sp"
             tools:text="\@ 12:50pm" />
     </LinearLayout>
 
