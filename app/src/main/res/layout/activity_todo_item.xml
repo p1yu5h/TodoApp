@@ -15,15 +15,54 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/add_task_input_layout" />
 
+    <Switch
+        android:id="@+id/switch_task_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:text="Completed?"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/add_alarm" />
+
     <TextView
         android:id="@+id/time_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:text="Alarm Not Set"
+        android:text="Reminder Not Set"
         android:textSize="18sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/add_task_input_layout" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:text="Comments"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+
+        app:layout_constraintBottom_toBottomOf="@+id/add_comment"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/switch_task_status" />
+
+    <ImageButton android:id="@+id/add_comment"
+        android:src="@android:drawable/ic_input_add"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toEndOf="@+id/textView2"
+        android:text="Add Comment"
+        app:layout_constraintTop_toBottomOf="@+id/switch_task_status" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/comments_recyclerview"
+        android:layout_width="match_parent"
+        android:layout_height="360dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView2"
+        android:padding="16dp"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_save_task"
@@ -52,13 +91,4 @@
             android:layout_height="wrap_content" />
 
     </com.google.android.material.textfield.TextInputLayout>
-
-    <Switch
-        android:id="@+id/switch_task_status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/add_alarm"
-        android:layout_marginEnd="8dp"
-        android:layout_marginTop="16dp"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

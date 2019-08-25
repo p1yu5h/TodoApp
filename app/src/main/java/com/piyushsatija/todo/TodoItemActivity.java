@@ -2,21 +2,31 @@ package com.piyushsatija.todo;
 
 import android.app.Activity;
 import android.app.TimePickerDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Parcelable;
+import android.text.InputType;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
+import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -24,6 +34,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
@@ -45,6 +56,9 @@ public class TodoItemActivity extends AppCompatActivity implements View.OnClickL
     private boolean taskStatus;
     private int requestCode;
     private TodoItem todoItem;
+    private RecyclerView commentRecyclerView;
+    private FirestoreRecyclerAdapter<Comment, CommentViewHolder> adapter;
+    private ImageButton addCommentBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +70,8 @@ public class TodoItemActivity extends AppCompatActivity implements View.OnClickL
         taskNameEditText = findViewById(R.id.add_task_input_text);
         taskStatusSwitch = findViewById(R.id.switch_task_status);
         findViewById(R.id.add_alarm).setOnClickListener(this);
+        addCommentBtn = findViewById(R.id.add_comment);
+        addCommentBtn.setOnClickListener(this);
         setupToolbar();
         handleIntent();
         // Access a Cloud Firestore instance from your Activity
@@ -67,6 +83,7 @@ public class TodoItemActivity extends AppCompatActivity implements View.OnClickL
                 taskStatus = isChecked;
             }
         });
+        if (todoItem != null) setupCommentsRecyclerView();
     }
 
     private void handleIntent() {
@@ -79,7 +96,8 @@ public class TodoItemActivity extends AppCompatActivity implements View.OnClickL
             taskStatusSwitch.setChecked(taskStatus);
             taskTime = todoItem.getTaskTime();
             timeText.setText(taskTime);
-        }
+            addCommentBtn.setEnabled(true);
+        } else addCommentBtn.setEnabled(false);
     }
 
     private void setupToolbar() {
@@ -87,6 +105,64 @@ public class TodoItemActivity extends AppCompatActivity implements View.OnClickL
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setTitle("Add a Task");
+        }
+    }
+
+    private void setupCommentsRecyclerView() {
+        commentRecyclerView = findViewById(R.id.comments_recyclerview);
+        commentRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        db.collection("users").document(sharedPrefUtils.getUserEmail())
+                .collection("tasks")
+                .whereEqualTo("date", todoItem.date).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful()) {
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        Query query = db.collection("users").document(sharedPrefUtils.getUserEmail())
+                                .collection("tasks")
+                                .document(document.getId())
+                                .collection("comments")
+                                .orderBy("date", Query.Direction.DESCENDING);
+                        FirestoreRecyclerOptions<Comment> options = new FirestoreRecyclerOptions.Builder<Comment>()
+                                .setQuery(query, Comment.class)
+                                .build();
+                        adapter = new FirestoreRecyclerAdapter<Comment, CommentViewHolder>(options) {
+                            @Override
+                            protected void onBindViewHolder(@NonNull CommentViewHolder commentViewHolder, int position, @NonNull final Comment comment) {
+                                commentViewHolder.setComment(comment.getComment());
+                                Log.d("comment", comment.getComment());
+                            }
+
+                            @NonNull
+                            @Override
+                            public CommentViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                                View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.comment_list_item, parent, false);
+                                return new CommentViewHolder(view);
+                            }
+                        };
+                        commentRecyclerView.setAdapter(adapter);
+                        adapter.startListening();
+                    }
+                }
+            }
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (adapter != null) {
+            adapter.startListening();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        if (adapter != null) {
+            adapter.stopListening();
         }
     }
 
@@ -128,7 +204,8 @@ public class TodoItemActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private void updateTask() {
-        final CollectionReference collectionReference = db.collection("users").document(sharedPrefUtils.getUserEmail()).collection("tasks");
+        final CollectionReference collectionReference = db.collection("users")
+                .document(sharedPrefUtils.getUserEmail()).collection("tasks");
         collectionReference.whereEqualTo("date", todoItem.date).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -143,6 +220,49 @@ public class TodoItemActivity extends AppCompatActivity implements View.OnClickL
                 }
             }
         });
+    }
+
+    private void addComment() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Add Comment");
+
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        builder.setView(input);
+
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String commentText = input.getText().toString();
+                if (!commentText.isEmpty()) {
+                    final Comment comment = new Comment(commentText);
+                    final CollectionReference collectionReference = db.collection("users")
+                            .document(sharedPrefUtils.getUserEmail()).collection("tasks");
+                    collectionReference.whereEqualTo("date", todoItem.date).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            if (task.isSuccessful()) {
+                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                    collectionReference.document(document.getId())
+                                            .collection("comments")
+                                            .add(comment);
+//                                            .document()
+//                                            .set(comment, SetOptions.merge());
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
     }
 
     @Override
@@ -161,6 +281,23 @@ public class TodoItemActivity extends AppCompatActivity implements View.OnClickL
                 setResult(Activity.RESULT_OK, returnIntent);
                 finish();
                 break;
+            case R.id.add_comment:
+                addComment();
+                break;
         }
+    }
+}
+
+class CommentViewHolder extends RecyclerView.ViewHolder {
+    private View view;
+
+    CommentViewHolder(View itemView) {
+        super(itemView);
+        view = itemView;
+    }
+
+    void setComment(String comment) {
+        TextView textView = view.findViewById(R.id.comment_textview);
+        textView.setText(comment);
     }
 }
