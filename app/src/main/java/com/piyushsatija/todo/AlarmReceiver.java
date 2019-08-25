@@ -24,9 +24,8 @@ public class AlarmReceiver extends BroadcastReceiver {
         PendingIntent pendingI = PendingIntent.getActivity(context, 0,
                 notificationIntent, 0);
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(intent.getStringExtra("title"),
-                    intent.getStringExtra("title"),
-                    NotificationManager.IMPORTANCE_DEFAULT);
+            NotificationChannel channel = new NotificationChannel("default",
+                    "Default Channel", NotificationManager.IMPORTANCE_HIGH);
             channel.setDescription("Daily Notification");
             if (nm != null) {
                 nm.createNotificationChannel(channel);
